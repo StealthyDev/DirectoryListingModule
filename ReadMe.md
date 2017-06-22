@@ -10,7 +10,12 @@ Source: http://mvolo.com/get-nice-looking-directory-listings-for-your-iis-websit
   * Security - enable Windows Authentication
   * Common HTTP - enable WebDav publishing
   * Install ASP.net
-* At the site level, disable all authentication methods except Windows Authentication
-* Change the IIS DefaultAppPool identity from ApplicationPoolIdentity to LocalSystem
+* Run following command as Administrator
+%windir%\System32\inetsrv\appcmd set module DirectoryListingModule /lockItem:false
+* At the site level
+    * Disable all authentication methods except Windows Authentication
+    * Change the IIS DefaultAppPool identity from ApplicationPoolIdentity to LocalSystem
+    * Enable WebDav Authorizing rules in root
 * Add an IIS virtual directory pointing to a local physical path. 
-* Enable directory listing in virtual directory
+    * Enable directory listing in virtual directory
+    * Add authorizing rule in the virtual directory

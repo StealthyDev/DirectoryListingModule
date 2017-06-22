@@ -119,8 +119,8 @@ String GetFileSizeString(FileSystemInfo info)
             <hr />
             <asp:DataList id="DirectoryListing" runat="server">
                 <ItemTemplate>
-                    <img alt="icon" src="<%=HttpRuntime.AppDomainAppVirtualPath %>/geticon.axd?file=<%# Path.GetExtension(((DirectoryListingEntry)Container.DataItem).Path) %>" /> 
-                    <a href="<%# ((DirectoryListingEntry)Container.DataItem).VirtualPath  %>"><%# ((DirectoryListingEntry)Container.DataItem).Filename %></a>
+                    <img alt="icon" src="/geticon.axd?file=<%# Path.GetExtension(((DirectoryListingEntry)Container.DataItem).Path) %>" />
+                    <a href="ms-word:ofv|u|<%# new Uri(HttpContext.Current.Request.Url, "/")+((DirectoryListingEntry)Container.DataItem).VirtualPath  %>"><%# ((DirectoryListingEntry)Container.DataItem).Filename %></a>
                     &nbsp<%# GetFileSizeString(((DirectoryListingEntry)Container.DataItem).FileSystemInfo) %>
                 </ItemTemplate>
             </asp:DataList>
