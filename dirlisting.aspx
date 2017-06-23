@@ -8,8 +8,7 @@ void Page_Load()
     String path = null;
     String parentPath = null;
     int count = 0;
-    String sortBy = Request.QueryString["sortby"];
-    
+
     //
     // Databind to the directory listing
     //
@@ -19,37 +18,6 @@ void Page_Load()
     if (listing == null)
     {
         throw new Exception("This page cannot be used without the DirectoryListing module");
-    }
-
-    //
-    // Handle sorting
-    //
-    if (!String.IsNullOrEmpty(sortBy))
-    {
-        if (sortBy.Equals("name"))
-        {
-            listing.Sort(DirectoryListingEntry.CompareFileNames);
-        }
-        else if (sortBy.Equals("namerev"))
-        {
-            listing.Sort(DirectoryListingEntry.CompareFileNamesReverse);
-        }            
-        else if (sortBy.Equals("date"))
-        {
-            listing.Sort(DirectoryListingEntry.CompareDatesModified);        
-        }
-        else if (sortBy.Equals("daterev"))
-        {
-            listing.Sort(DirectoryListingEntry.CompareDatesModifiedReverse);        
-        }
-        else if (sortBy.Equals("size"))
-        {
-            listing.Sort(DirectoryListingEntry.CompareFileSizes);
-        }
-        else if (sortBy.Equals("sizerev"))
-        {
-            listing.Sort(DirectoryListingEntry.CompareFileSizesReverse);
-        }
     }
 
     DirectoryListing.DataSource = listing;
@@ -85,6 +53,17 @@ void Page_Load()
     }
 }
 
+String GetFileModifiedString(FileSystemInfo info)
+{
+    if (info is FileInfo)
+    {
+        return ((FileInfo)info).LastWriteTime.ToString();
+    }
+    else
+    {
+        return String.Empty;
+    }
+}
 String GetFileSizeString(FileSystemInfo info)
 {
     if (info is FileInfo)
@@ -122,31 +101,57 @@ String GetHyperLink(DirectoryListingEntry dirEntry)
             a:hover { text-decoration: underline; }
             p {font-family: verdana; font-size: 10pt; }
             h2 {font-family: verdana; }
-            td {font-family: verdana; font-size: 10pt; }                           
+            td {font-family: verdana; font-size: 10pt; }
         </style>
+        <link rel="stylesheet" type="text/css" href="/static/datatables/datatables.min.css"/>
+        <script type="text/javascript" src="/static/datatables/datatables.min.js"></script>
+        <script>
+            $(document).ready(function(){
+                $('#DirectoryListing').DataTable({
+                    "order": [[ 0, "asc" ]],
+                    "paging":   false,
+                    "info":     false,
+                    "searching": false,
+                    "autoWidth": false
+                });
+            });
+        </script>
+</script>
     </head>
     <body>
-        <h2><%= Context.Request.Path %> <asp:HyperLink runat="server" id="NavigateUpLink">[..]</asp:HyperLink></h2>
-        <p>
-        <a href="?sortby=name">sort by name</a>/<a href="?sortby=namerev">-</a> |
-        <a href="?sortby=date">sort by date</a>/<a href="?sortby=daterev">-</a> |
-        <a href="?sortby=size">sort by size</a>/<a href="?sortby=sizerev">-</a>        
-        </p>
+        <h2><%= Context.Request.Path %> </h2>
+        <asp:HyperLink runat="server" id="NavigateUpLink"><img src="/static/level-up.png" /> To Parent Directory</asp:HyperLink>
         <form runat="server">
-            <hr />
-            <asp:DataList id="DirectoryListing" runat="server">
+            <asp:Repeater ID="DirectoryListing" runat="server" EnableViewState="False">
                 <HeaderTemplate>
-                   <td><h3>Files and folders</h3></td>
+                    <table id="DirectoryListing" style="width:800px; text-align:left; margin-left: 0px;">
+                        <col width="450">
+                        <col width="225">
+                        <col width="125">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Modified</th>
+                            <th>Size</th>
+                        </tr>
+                        <tbody>
                 </HeaderTemplate>
                 <ItemTemplate>
-                    <td>
-                        <span style="float: left; width: 100px;"><%# GetFileSizeString(((DirectoryListingEntry)Container.DataItem).FileSystemInfo) %></span>
-                        <img alt="icon" src="/geticon.axd?file=<%# Path.GetExtension(((DirectoryListingEntry)Container.DataItem).Path) %>" />
-                        <a href="<%# GetHyperLink((DirectoryListingEntry)Container.DataItem) %>"><%# ((DirectoryListingEntry)Container.DataItem).Filename %></a>
-                    </td>
+                    <tr>
+                        <td>
+                            <img alt="icon" src="/geticon.axd?file=<%# Path.GetExtension(((DirectoryListingEntry)Container.DataItem).Path) %>" />
+                            <a href="<%# GetHyperLink((DirectoryListingEntry)Container.DataItem) %>"><%# ((DirectoryListingEntry)Container.DataItem).Filename %></a>
+                        </td>
+                        <td><%# GetFileModifiedString(((DirectoryListingEntry)Container.DataItem).FileSystemInfo) %></td>
+                        <td><%# GetFileSizeString(((DirectoryListingEntry)Container.DataItem).FileSystemInfo) %></td>
+                    </tr>
                 </ItemTemplate>
-            </asp:DataList>
-            <hr />
+                <FooterTemplate>
+                    </tbody>
+                    </table>
+                </FooterTemplate>
+            </asp:Repeater>
+
             <p>
                 <asp:Label runat="Server" id="FileCount" />
             </p>
