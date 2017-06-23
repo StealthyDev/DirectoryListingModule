@@ -54,7 +54,7 @@ void Page_Load()
 
     DirectoryListing.DataSource = listing;
     DirectoryListing.DataBind();
-        
+
     //
     //  Prepare the file counter label
     //
@@ -89,12 +89,29 @@ String GetFileSizeString(FileSystemInfo info)
 {
     if (info is FileInfo)
     {
-        return String.Format("- {0}K", ((int)(((FileInfo)info).Length * 10 / (double)1024) / (double)10));
+        return String.Format("{0}K", ((int)(((FileInfo)info).Length * 10 / (double)1024) / (double)10));
     }
     else
     {
         return String.Empty;
     }
+}
+String GetUriPrefix(String fileExtension)
+{
+    fileExtension = fileExtension.ToLower();
+    if(fileExtension.Equals(".docx") || fileExtension.Equals(".doc")) return "ms-word:ofv|u|";
+    if(fileExtension.Equals(".xls") || fileExtension.Equals(".xlsx")) return "ms-excel:ofv|u|";
+    if(fileExtension.Equals(".ppt") || fileExtension.Equals(".pptx")) return "ms-powerpoint:ofv|u|";
+    return "";
+}
+String GetHyperLink(DirectoryListingEntry dirEntry)
+{
+    String extension = Path.GetExtension(dirEntry.Path);
+    String uriPrefix = GetUriPrefix(extension);
+    String baseUrl = new Uri(HttpContext.Current.Request.Url, "/").ToString();
+    String hyperlink = uriPrefix + baseUrl + dirEntry.VirtualPath;
+
+    return hyperlink;
 }
 </script>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -118,10 +135,15 @@ String GetFileSizeString(FileSystemInfo info)
         <form runat="server">
             <hr />
             <asp:DataList id="DirectoryListing" runat="server">
+                <HeaderTemplate>
+                   <td><h3>Files and folders</h3></td>
+                </HeaderTemplate>
                 <ItemTemplate>
-                    <img alt="icon" src="/geticon.axd?file=<%# Path.GetExtension(((DirectoryListingEntry)Container.DataItem).Path) %>" />
-                    <a href="ms-word:ofv|u|<%# new Uri(HttpContext.Current.Request.Url, "/")+((DirectoryListingEntry)Container.DataItem).VirtualPath  %>"><%# ((DirectoryListingEntry)Container.DataItem).Filename %></a>
-                    &nbsp<%# GetFileSizeString(((DirectoryListingEntry)Container.DataItem).FileSystemInfo) %>
+                    <td>
+                        <span style="float: left; width: 100px;"><%# GetFileSizeString(((DirectoryListingEntry)Container.DataItem).FileSystemInfo) %></span>
+                        <img alt="icon" src="/geticon.axd?file=<%# Path.GetExtension(((DirectoryListingEntry)Container.DataItem).Path) %>" />
+                        <a href="<%# GetHyperLink((DirectoryListingEntry)Container.DataItem) %>"><%# ((DirectoryListingEntry)Container.DataItem).Filename %></a>
+                    </td>
                 </ItemTemplate>
             </asp:DataList>
             <hr />
