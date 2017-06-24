@@ -68,7 +68,8 @@ String GetFileSizeString(FileSystemInfo info)
 {
     if (info is FileInfo)
     {
-        return String.Format("{0}K", ((int)(((FileInfo)info).Length * 10 / (double)1024) / (double)10));
+        long lengthInK = ((FileInfo)info).Length / 1024;
+        return lengthInK.ToString("N0") + " KB";
     }
     else
     {
@@ -96,14 +97,20 @@ String GetHyperLink(DirectoryListingEntry dirEntry)
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>Directory contents of <%= Context.Request.Path %></title>
+        <link rel="stylesheet" type="text/css" href="/static/datatables/datatables.min.css"/>
         <style type="text/css">
             a { text-decoration: none; }
             a:hover { text-decoration: underline; }
             p {font-family: verdana; font-size: 10pt; }
-            h2 {font-family: verdana; }
+            h2 {font-family: verdana; margin:0px;}
+            table {width:800px; text-align:left; margin-left: 0px; border: 0px;}
             td {font-family: verdana; font-size: 10pt; }
+            th:nth-child(odd), td:nth-child(odd) {background-color: #f9f9f9;}
+            td {border-top:1pt solid #dddddd;}
+            th {border-top:1pt solid #dddddd;}
+            th:first-child, td:first-child {border-left:1pt solid #dddddd;}
+            th:last-child, td:last-child {border-right:1pt solid #dddddd;}
         </style>
-        <link rel="stylesheet" type="text/css" href="/static/datatables/datatables.min.css"/>
         <script type="text/javascript" src="/static/datatables/datatables.min.js"></script>
         <script>
             $(document).ready(function(){
@@ -120,7 +127,12 @@ String GetHyperLink(DirectoryListingEntry dirEntry)
     </head>
     <body>
         <h2><%= Context.Request.Path %> </h2>
-        <asp:HyperLink runat="server" id="NavigateUpLink"><img src="/static/level-up.png" /> To Parent Directory</asp:HyperLink>
+        <asp:HyperLink runat="server" id="NavigateUpLink">
+            <img style="vertical-align:bottom" src="/static/level-up.png" />
+            To Parent Directory
+        </asp:HyperLink>
+        <br />
+        <br />
         <form runat="server">
             <asp:Repeater ID="DirectoryListing" runat="server" EnableViewState="False">
                 <HeaderTemplate>
@@ -139,7 +151,7 @@ String GetHyperLink(DirectoryListingEntry dirEntry)
                 <ItemTemplate>
                     <tr>
                         <td>
-                            <img alt="icon" src="/geticon.axd?file=<%# Path.GetExtension(((DirectoryListingEntry)Container.DataItem).Path) %>" />
+                            <img alt="icon" src="/geticon.axd?file=<%# Path.GetExtension(((DirectoryListingEntry)Container.DataItem).Path) %>&size=small" />
                             <a href="<%# GetHyperLink((DirectoryListingEntry)Container.DataItem) %>"><%# ((DirectoryListingEntry)Container.DataItem).Filename %></a>
                         </td>
                         <td><%# GetFileModifiedString(((DirectoryListingEntry)Container.DataItem).FileSystemInfo) %></td>
