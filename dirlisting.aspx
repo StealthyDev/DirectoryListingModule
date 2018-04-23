@@ -68,7 +68,7 @@
     String GetHyperLink(DirectoryListingEntry dirEntry) {
         String extension = Path.GetExtension(dirEntry.Path);
         String uriPrefix = GetUriPrefix(extension);
-        String baseUrl = new Uri(HttpContext.Current.Request.Url, "/").ToString();
+        String baseUrl = Request.Url.Scheme + "://" + Request.Url.Authority + Request.ApplicationPath.TrimEnd('/');
         String hyperlink = uriPrefix + baseUrl + dirEntry.VirtualPath;
         return hyperlink;
     }
