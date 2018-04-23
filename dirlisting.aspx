@@ -81,12 +81,30 @@
         if(currentFolder.Equals("")) currentFolder = Context.Request.Url.AbsolutePath;
         return currentFolder;
     }
+
+    String GetFileIconCss(String extn) {
+        String iconCss = "";
+        switch(extn) {
+            case ".pdf": iconCss = "file-pdf"; break;
+            case ".docx":
+            case ".doc": iconCss = "file-word"; break;
+            case ".xlsx":
+            case ".xls": iconCss = "file-excel"; break;
+            case ".txt": iconCss = "file-alt"; break;
+            default: iconCss = "file"; break;
+        }
+        if(extn.Length == 0) {
+            iconCss = "folder";
+        }
+        return iconCss;
+    }
 </script>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>Directory contents of <%= Context.Request.Path %></title>
         <link rel="stylesheet" type="text/css" href="/static/datatables/datatables.min.css"/>
+        <link rel="stylesheet" type="text/css" href="/static/fa/fontawesome-all.css"/>
         <style type="text/css">
             a { text-decoration: none; }
             a:hover { text-decoration: underline; }
@@ -99,12 +117,17 @@
             th {border-top:1pt solid #dddddd;}
             th:first-child, td:first-child {border-left:1pt solid #dddddd;}
             th:last-child, td:last-child {border-right:1pt solid #dddddd;}
+            .dataTables_wrapper table thead{
+                display:none;
+            }
+            .far {font-size: 20px; width: 25px;}
         </style>
         <script type="text/javascript" src="/static/datatables/datatables.min.js"></script>
         <script>
             $(document).ready(function(){
                 $('#DirectoryListing').DataTable({
-                    "order": [[ 0, "asc" ]],
+                    // "order": [[ 0, "asc" ]],
+                    "ordering": false,
                     "paging":   false,
                     "info":     false,
                     "searching": false,
@@ -117,7 +140,6 @@
     <% if(!path.Equals("/") || (path.Equals("/") & isRootAllowed)) { %>
         <div style="height:80px;">
             <h2><%= GetPath() %> </h2>
-            <!--%=VirtualPathUtility.AppendTrailingSlash(HttpRuntime.AppDomainAppVirtualPath)%-->
             <asp:HyperLink runat="server" id="NavigateUpLink">
                 <img style="vertical-align:bottom" src="/static/level-up.png" />
                 To Parent Directory
@@ -128,25 +150,18 @@
             <asp:Repeater ID="DirectoryListing" runat="server" EnableViewState="False">
                 <HeaderTemplate>
                     <table id="DirectoryListing" style="width:1000px; text-align:left; margin-left: 0px;">
-                        <col width="650">
-                        <col width="225">
-                        <col width="125">
                         <thead>
                         <tr>
                             <th>Name</th>
-                            <th>Modified</th>
-                            <th>Size</th>
                         </tr>
                         <tbody>
                 </HeaderTemplate>
                 <ItemTemplate>
                     <tr>
                         <td>
-                            <img alt="icon" src="/geticon.axd?file=<%# Path.GetExtension(((DirectoryListingEntry)Container.DataItem).Path) %>&size=small" />
+                            <i class="far fa-<%# GetFileIconCss(Path.GetExtension(((DirectoryListingEntry)Container.DataItem).Path)) %>"></i>
                             <a href="<%# GetHyperLink((DirectoryListingEntry)Container.DataItem) %>"><%# ((DirectoryListingEntry)Container.DataItem).Filename %></a>
                         </td>
-                        <td><%# GetFileModifiedString(((DirectoryListingEntry)Container.DataItem).FileSystemInfo) %></td>
-                        <td><%# GetFileSizeString(((DirectoryListingEntry)Container.DataItem).FileSystemInfo) %></td>
                     </tr>
                 </ItemTemplate>
                 <FooterTemplate>
