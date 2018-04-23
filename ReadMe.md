@@ -12,9 +12,6 @@ Source: http://mvolo.com/get-nice-looking-directory-listings-for-your-iis-websit
   * Install ASP.net
 * Run following command as Administrator
 %windir%\System32\inetsrv\appcmd set module DirectoryListingModule /lockItem:false
-* To enable special characters like & in URL, enable following option in registry
-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\ASP.NET
-VerificationCompatibility=1 (dword)
 * At the site level
     * Disable all authentication methods except Windows Authentication
     * Change the IIS DefaultAppPool identity from ApplicationPoolIdentity to LocalSystem
