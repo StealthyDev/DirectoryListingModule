@@ -78,8 +78,8 @@
         String[] foldersArray = Context.Request.Path.Split('/');
         if(foldersArray.Length > 0)
             currentFolder = foldersArray[foldersArray.Length - 1];
-        if(currentFolder == "") currentFolder = Context.Request.ApplicationPath;
-        return Context.Request.Url.AbsolutePath;
+        if(currentFolder.Equals("")) currentFolder = Context.Request.Url.AbsolutePath;
+        return currentFolder;
     }
 </script>
 
