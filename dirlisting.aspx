@@ -4,6 +4,7 @@
 <%@ Import Namespace="System.IO" %>
 <script runat="server">
     Boolean isRootAllowed = false;
+    Boolean showHidden = false;
     String path = null;
     String parentPath = null;
     int count = 0;
@@ -13,6 +14,18 @@
 
         if (listing == null) {
             throw new Exception("This page cannot be used without the DirectoryListing module");
+        }
+
+        if(!showHidden) {
+            ArrayList hidden = new ArrayList();
+            foreach (DirectoryListingEntry entry in listing) {
+                if ((entry.FileSystemInfo.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden) {
+                    hidden.Add(entry);
+                }
+            }
+            foreach (DirectoryListingEntry hiddenEntry in hidden) {
+                listing.Remove(hiddenEntry);
+            }
         }
 
         DirectoryListing.DataSource = listing;
